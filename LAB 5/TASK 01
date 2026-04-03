@@ -1,1 +1,185 @@
+#include<iostream>
+#include "Node.h"
+using namespace std;
+Node* copy(Node* head)
+{
+    if (head == nullptr)
+        return nullptr;
 
+    Node* newHead = new Node{ head->data, nullptr };
+    Node* tempNew = newHead;
+    Node* tempOld = head->next;
+
+    while (tempOld != nullptr)
+    {
+        tempNew->next = new Node{ tempOld->data, nullptr };
+        tempNew = tempNew->next;
+        tempOld = tempOld->next;
+    }
+
+    return newHead;
+}
+
+// 2. Free memory
+void freeMemory(Node* head)
+{
+    Node* temp;
+    while (head != nullptr)
+    {
+        temp = head;
+        head = head->next;
+        delete temp;
+    }
+}
+
+// 3. Insert at position (0-based)
+void insert(Node* head, const int& value, const int& pos)
+{
+    if (head == nullptr)
+        return;
+
+    Node* newNode = new Node{ value, nullptr };
+
+    // Insert at head (special handling)
+    if (pos == 0)
+    {
+        newNode->next = head->next;
+        head->next = newNode;
+
+        // swap data (since head not passed by reference)
+        int temp = head->data;
+        head->data = newNode->data;
+        newNode->data = temp;
+        return;
+    }
+
+    Node* curr = head;
+    for (int i = 0; curr != nullptr && i < pos - 1; i++)
+    {
+        curr = curr->next;
+    }
+
+    if (curr == nullptr)
+    {
+        cout << "Position out of range\n";
+        delete newNode;
+        return;
+    }
+
+    newNode->next = curr->next;
+    curr->next = newNode;
+}
+
+// 4. Remove at position (0-based)
+int remove(Node* head, const int& pos)
+{
+    if (head == nullptr)
+        return -1;
+
+    // Remove head
+    if (pos == 0)
+    {
+        int val = head->data;
+
+        if (head->next != nullptr)
+        {
+            Node* temp = head->next;
+            head->data = temp->data;
+            head->next = temp->next;
+            delete temp;
+        }
+        else
+        {
+            delete head;
+        }
+
+        return val;
+    }
+
+    Node* curr = head;
+    for (int i = 0; curr->next != nullptr && i < pos - 1; i++)
+    {
+        curr = curr->next;
+    }
+
+    if (curr->next == nullptr)
+    {
+        cout << "Position out of range\n";
+        return -1;
+    }
+
+    Node* temp = curr->next;
+    int val = temp->data;
+
+    curr->next = temp->next;
+    delete temp;
+
+    return val;
+}
+
+// 5. Display function
+void display(Node* head)
+{
+    Node* curr = head;
+    while (curr != nullptr)
+    {
+        cout << curr->data << " -> ";
+        curr = curr->next;
+    }
+    cout << "NULL\n";
+}
+
+// ---------------- MAIN FUNCTION ----------------
+int main()
+{
+    Node* head = nullptr;
+    Node* tail = nullptr;
+
+    int n;
+    cout << "Enter number of elements: ";
+    cin >> n;
+
+    // Create list
+    for (int i = 0; i < n; i++)
+    {
+        int value;
+        cout << "Enter element " << i + 1 << ": ";
+        cin >> value;
+
+        Node* newNode = new Node{ value, nullptr };
+
+        if (head == nullptr)
+        {
+            head = tail = newNode;
+        }
+        else
+        {
+            tail->next = newNode;
+            tail = newNode;
+        }
+    }
+
+    cout << "\nOriginal List:\n";
+    display(head);
+
+    // Test insert
+    insert(head, 100, 1);
+    cout << "\nAfter inserting 100 at position 1:\n";
+    display(head);
+
+    // Test remove
+    int removedValue = remove(head, 2);
+    cout << "\nRemoved value at position 2: " << removedValue << endl;
+    display(head);
+
+    // Test copy
+    Node* copiedList = copy(head);
+    cout << "\nCopied List:\n";
+    display(copiedList);
+
+    // Free memory
+    freeMemory(head);
+    freeMemory(copiedList);
+
+    return 0;
+}
